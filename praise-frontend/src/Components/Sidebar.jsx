@@ -92,7 +92,7 @@ const Sidebar = ({
   return (
     <>
       {/* SIDEBAR (Intact) */}
-      <aside className=" w-[260px] h-screen bg-[#1a1a1a] text-white flex flex-col justify-between shadow-[2px_0_8px_rgba(0,0,0,0.07)] relative">
+      <aside className="fixed top-0 left-0 w-[260px] h-screen bg-[#1a1a1a] text-white flex flex-col justify-between shadow-[2px_0_8px_rgba(0,0,0,0.07)] z-50">
         {/* TOP SECTION (Intact) */}
         <div className="p-8 pb-6 border-b border-[#222] relative" ref={repoRef}>
           <div
