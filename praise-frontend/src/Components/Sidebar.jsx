@@ -62,7 +62,16 @@ const Sidebar = ({
 
           {/* DROPDOWN MENU */}
           {showRepoModal && (
-            <div className="absolute left-0 top-[70px] bg-[#222] rounded-lg p-6 min-w-[320px] shadow-lg z-50">
+          <div
+  className="
+    absolute left-55 top-[48px]
+    bg-neutral-900/95 backdrop-blur-md
+    rounded-2xl p-6 min-w-[320px]
+    shadow-[0_8px_30px_rgba(0,0,0,0.5)]
+    border border-white/10
+    z-50 transition-all duration-300
+  "
+>
               <div className="mb-4 font-semibold text-lg">
                 Select Repository
               </div>
@@ -83,15 +92,31 @@ const Sidebar = ({
                   </li>
                 ))}
               </ul>
-              <button
-                className="w-full py-2 bg-[#2ea44f] text-white rounded font-medium hover:bg-[#238636] transition"
-                onClick={() => {
-                  setShowRepoModal(false);
-                  setTimeout(() => setShowImportRepo(true), 100); // ⏱ fix render delay
-                }}
-              >
-                Add New Repository from GitHub
-              </button>
+
+             <button
+  className="w-full py-2.5 px-4 bg-[#43b96f] text-white text-sm font-normal 
+             rounded-md shadow-sm hover:bg-[#3aa865] 
+             hover:shadow-md active:scale-[0.99] 
+             transition-all duration-200 flex items-center justify-center gap-2"
+  onClick={() => {
+    setShowRepoModal(false);
+    setTimeout(() => setShowImportRepo(true), 100); // ⏱ fix render delay
+  }}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className="w-4 h-4"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+  </svg>
+  Add Repository from GitHub
+</button>
+
+
             </div>
           )}
         </div>
