@@ -8,6 +8,7 @@ import {
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GitHubProvider } from "./context/GitHubContext";
 import { RepositoryProvider } from "./context/RepositoryContext";
+import { BadgeProvider } from "./context/BadgeContext";
 import Signup from "./Pages/Signup";
 import Login from "./Pages/Login";
 import HomePage from "./Pages/HomePage";
@@ -54,50 +55,52 @@ function App() {
     <AuthProvider>
       <GitHubProvider>
         <RepositoryProvider>
-          <Router>
-            <div className="App">
-              <Routes>
-                {/* Public routes - redirect to /home if authenticated */}
-                <Route
-                  path="/"
-                  element={
-                    <PublicRoute>
-                      <Signup />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    <PublicRoute>
-                      <Signup />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    <PublicRoute>
-                      <Login />
-                    </PublicRoute>
-                  }
-                />
+          <BadgeProvider>
+            <Router>
+              <div className="App">
+                <Routes>
+                  {/* Public routes - redirect to /home if authenticated */}
+                  <Route
+                    path="/"
+                    element={
+                      <PublicRoute>
+                        <Signup />
+                      </PublicRoute>
+                    }
+                  />
+                  <Route
+                    path="/signup"
+                    element={
+                      <PublicRoute>
+                        <Signup />
+                      </PublicRoute>
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      <PublicRoute>
+                        <Login />
+                      </PublicRoute>
+                    }
+                  />
 
-                {/* Protected routes - require authentication */}
-                <Route
-                  path="/home"
-                  element={
-                    <ProtectedRoute>
-                      <HomePage />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected routes - require authentication */}
+                  <Route
+                    path="/home"
+                    element={
+                      <ProtectedRoute>
+                        <HomePage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Redirect any unknown routes to home if authenticated, otherwise to login */}
-                <Route path="*" element={<Navigate to="/home" replace />} />
-              </Routes>
-            </div>
-          </Router>
+                  {/* Redirect any unknown routes to home if authenticated, otherwise to login */}
+                  <Route path="*" element={<Navigate to="/home" replace />} />
+                </Routes>
+              </div>
+            </Router>
+          </BadgeProvider>
         </RepositoryProvider>
       </GitHubProvider>
     </AuthProvider>

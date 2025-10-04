@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRepository } from "../context/RepositoryContext";
+import { useBadge } from "../context/BadgeContext";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 import Milestones from "../Components/Milestones";
+import BadgeUnlockPopup from "../Components/BadgeUnlockPopup";
 
 const HomePage = () => {
   const { user, logout, loading } = useAuth();
   const { selectedRepository, selectRepository } = useRepository();
+  const { checkBadges, unlockedBadges, showPopup, hidePopup } = useBadge();
   const [currentRepo, setCurrentRepo] = useState(null);
   const navigate = useNavigate();
 
@@ -18,9 +21,18 @@ const HomePage = () => {
     }
   };
 
-  const handleRepoChange = (repo) => {
+  const handleRepoChange = async (repo) => {
     setCurrentRepo(repo);
     selectRepository(repo);
+
+    // Check for badge unlocks when contributor selects a repository
+    if (repo && repo.userRole === "contributor") {
+      try {
+        await checkBadges(repo.id);
+      } catch (error) {
+        console.error("Error checking badges:", error);
+      }
+    }
   };
 
   if (loading) {
@@ -59,6 +71,11 @@ const HomePage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Sidebar */}
       <Sidebar onRepoChange={handleRepoChange} />
+
+      {/* Badge Unlock Popup */}
+      {showPopup && unlockedBadges.length > 0 && (
+        <BadgeUnlockPopup badges={unlockedBadges} onClose={hidePopup} />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
