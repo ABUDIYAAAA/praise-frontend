@@ -2,7 +2,7 @@ import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
-import Body from "../Components/Body";
+import Milestones from "../Components/Milestones";
 
 const HomePage = () => {
   const { user, logout, loading } = useAuth();
@@ -53,7 +53,7 @@ const HomePage = () => {
       <Sidebar />
 
       {/* Main Content */}
-      <Body />
+      <Milestones />
     </div>
   );
 };
