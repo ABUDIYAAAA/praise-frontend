@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GitHubProvider } from "./context/GitHubContext";
+import { RepositoryProvider } from "./context/RepositoryContext";
 import Signup from "./Pages/Signup";
 import Login from "./Pages/Login";
 import HomePage from "./Pages/HomePage";
@@ -52,50 +53,52 @@ function App() {
   return (
     <AuthProvider>
       <GitHubProvider>
-        <Router>
-          <div className="App">
-            <Routes>
-              {/* Public routes - redirect to /home if authenticated */}
-              <Route
-                path="/"
-                element={
-                  <PublicRoute>
-                    <Signup />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/signup"
-                element={
-                  <PublicRoute>
-                    <Signup />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
+        <RepositoryProvider>
+          <Router>
+            <div className="App">
+              <Routes>
+                {/* Public routes - redirect to /home if authenticated */}
+                <Route
+                  path="/"
+                  element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
 
-              {/* Protected routes - require authentication */}
-              <Route
-                path="/home"
-                element={
-                  <ProtectedRoute>
-                    <HomePage />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected routes - require authentication */}
+                <Route
+                  path="/home"
+                  element={
+                    <ProtectedRoute>
+                      <HomePage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Redirect any unknown routes to home if authenticated, otherwise to login */}
-              <Route path="*" element={<Navigate to="/home" replace />} />
-            </Routes>
-          </div>
-        </Router>
+                {/* Redirect any unknown routes to home if authenticated, otherwise to login */}
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </div>
+          </Router>
+        </RepositoryProvider>
       </GitHubProvider>
     </AuthProvider>
   );

@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useGitHub } from "../context/GitHubContext";
+import { useRepository } from "../context/RepositoryContext";
 import { useAuth } from "../context/AuthContext";
 
 const ImportRepo = ({ onClose }) => {
@@ -27,6 +28,9 @@ const ImportRepo = ({ onClose }) => {
     refreshRepositories,
   } = useGitHub();
 
+  const { importRepositories, refreshRepositories: refreshImportedRepos } =
+    useRepository();
+
   // Fetch repositories when component mounts
   useEffect(() => {
     if (repositories.length === 0) {
@@ -34,11 +38,8 @@ const ImportRepo = ({ onClose }) => {
     }
   }, [fetchRepositories, repositories.length]);
 
-  // Filter and sort repositories based on search term
+  // Filter and sort repositories based on search term (now showing all repos, not just owned)
   const filteredAndSortedRepos = useMemo(() => {
-    const ownedRepos = repositories.filter(
-      (repo) => repo.owner?.login === user?.githubUsername
-    );
     const searched = searchRepositories(searchTerm);
     return sortRepositories(searched, sortBy);
   }, [repositories, searchTerm, sortBy, searchRepositories, sortRepositories]);
@@ -50,38 +51,25 @@ const ImportRepo = ({ onClose }) => {
     try {
       console.log("Importing repository:", repo.fullName);
 
-      // Import repository via API
-      const API_BASE_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:5175";
-      const response = await fetch(`${API_BASE_URL}/api/repositories/import`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          repositoryIds: [repo.id],
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Import failed");
-      }
+      // Import repository using the RepositoryContext
+      const importData = await importRepositories([repo.id]);
 
       // Show success message
-      const importData = result.data;
       let message = `Repository "${repo.name}" imported successfully!`;
 
       if (importData.badgesCreated > 0) {
         message += ` ${importData.badgesCreated} badges created.`;
       }
 
+      if (importData.imported && importData.imported.length > 0) {
+        const importedRepo = importData.imported[0];
+        message += ` Role: ${importedRepo.role}`;
+      }
+
       alert(message);
 
-      // Optional: Refresh repositories list or close modal
-      // refreshRepositories();
+      // Refresh imported repositories list
+      await refreshImportedRepos();
     } catch (error) {
       console.error("Import failed:", error);
       alert(`Failed to import repository: ${error.message}`);

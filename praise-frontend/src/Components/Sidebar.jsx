@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImportRepo from "./ImportRepo";
 import { useGitHub } from "../context/GitHubContext";
+import { useRepository } from "../context/RepositoryContext";
 import { useAuth } from "../context/AuthContext";
 
 const Sidebar = ({
@@ -14,35 +15,40 @@ const Sidebar = ({
   const [showRepoModal, setShowRepoModal] = useState(false);
   const [showImportRepo, setShowImportRepo] = useState(false);
   const repoRef = useRef(null);
-  const { repositories, fetchRepositories } = useGitHub();
+  const {
+    repositories: importedRepositories,
+    fetchRepositories,
+    loading,
+    error,
+  } = useRepository();
   const { user } = useAuth();
 
   useEffect(() => {
-    if (repositories.length === 0) {
+    if (importedRepositories.length === 0) {
       fetchRepositories();
     }
-  }, [fetchRepositories, repositories.length]);
+  }, [fetchRepositories, importedRepositories.length]);
 
-  const repositoriesList = repositories.map((repo) => ({
-    id: repo.id,
+  const repositoriesList = importedRepositories.map((repo) => ({
+    id: repo._id,
     name: repo.name,
-    fullName: repo.full_name,
+    fullName: repo.fullName,
     description: repo.description,
     private: repo.private,
-    url: repo.html_url,
-    cloneUrl: repo.clone_url,
+    url: repo.url,
+    cloneUrl: repo.cloneUrl,
     language: repo.language,
-    stargazersCount: repo.stargazers_count,
-    forksCount: repo.forks_count,
-    updatedAt: repo.updated_at,
-    createdAt: repo.created_at,
-    defaultBranch: repo.default_branch,
+    stargazersCount: repo.stargazersCount,
+    forksCount: repo.forksCount,
+    updatedAt: repo.updatedAt,
+    createdAt: repo.createdAt,
+    defaultBranch: repo.defaultBranch,
     topics: repo.topics || [],
-    owner: {
-      login: repo.owner.login,
-      avatarUrl: repo.owner.avatar_url,
-    },
-    role: repo?.owner?.login === user.githubUsername ? "Owner" : "Contributor",
+    owner: repo.owner,
+    role: repo.userRole === "owner" ? "Owner" : "Contributor",
+    userRole: repo.userRole,
+    importedAt: repo.importedAt,
+    permissions: repo.permissions,
   }));
 
   useEffect(() => {
@@ -156,7 +162,11 @@ const Sidebar = ({
                   stroke="currentColor"
                   className="w-4 h-4"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Add Repository from GitHub
               </button>
