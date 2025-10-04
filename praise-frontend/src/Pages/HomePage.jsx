@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../Components/Sidebar";
 
 const HomePage = () => {
   const { user, logout, loading } = useAuth();
@@ -46,8 +47,12 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto px-4 py-8">
         {/* Header */}
         <header className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex justify-between items-center">
