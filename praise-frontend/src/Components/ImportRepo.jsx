@@ -36,6 +36,9 @@ const ImportRepo = ({ onClose }) => {
 
   // Filter and sort repositories based on search term
   const filteredAndSortedRepos = useMemo(() => {
+    const ownedRepos = repositories.filter(
+      (repo) => repo.owner?.login === user?.githubUsername
+    );
     const searched = searchRepositories(searchTerm);
     return sortRepositories(searched, sortBy);
   }, [repositories, searchTerm, sortBy, searchRepositories, sortRepositories]);
@@ -45,17 +48,43 @@ const ImportRepo = ({ onClose }) => {
     setImportingRepos((prev) => new Set(prev).add(repo.id));
 
     try {
-      // TODO: Implement actual import functionality
       console.log("Importing repository:", repo.fullName);
 
-      // Simulate import delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Import repository via API
+      const API_BASE_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:5175";
+      const response = await fetch(`${API_BASE_URL}/api/repositories/import`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          repositoryIds: [repo.id],
+        }),
+      });
 
-      // Show success message or redirect
-      alert(`Repository "${repo.name}" imported successfully!`);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Import failed");
+      }
+
+      // Show success message
+      const importData = result.data;
+      let message = `Repository "${repo.name}" imported successfully!`;
+
+      if (importData.badgesCreated > 0) {
+        message += ` ${importData.badgesCreated} badges created.`;
+      }
+
+      alert(message);
+
+      // Optional: Refresh repositories list or close modal
+      // refreshRepositories();
     } catch (error) {
       console.error("Import failed:", error);
-      alert("Failed to import repository. Please try again.");
+      alert(`Failed to import repository: ${error.message}`);
     } finally {
       setImportingRepos((prev) => {
         const updated = new Set(prev);
