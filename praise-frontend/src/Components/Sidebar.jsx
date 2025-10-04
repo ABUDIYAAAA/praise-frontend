@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImportRepo from "./ImportRepo";
-import ProfilePopup from "./ProfilePopup"; 
+import ProfilePopup from "./ProfilePopup";
 import { useGitHub } from "../context/GitHubContext";
 import { useRepository } from "../context/RepositoryContext";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +9,6 @@ const Sidebar = ({
   repoName = "Repo",
   userRole = "Contributor",
   repoIcon = "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-  profile = { name: "Your Name", avatar: "https://i.pravatar.cc/40" },
   onProfileClick = () => {},
   onRepoChange = () => {},
 }) => {
@@ -17,20 +16,20 @@ const Sidebar = ({
   const [showRepoModal, setShowRepoModal] = useState(false);
   const [showImportRepo, setShowImportRepo] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false); 
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // --- REFS FOR CLICK-OUTSIDE LOGIC ---
   const repoRef = useRef(null);
-  const profileRef = useRef(null); 
+  const profileRef = useRef(null);
 
-  const {
-    repositories: importedRepositories,
-    fetchRepositories,
-    loading,
-    error,
-  } = useRepository();
-  const { user } = useAuth();
-
+  const { repositories: importedRepositories, fetchRepositories } =
+    useRepository();
+  const { user, logout } = useAuth();
+  const profile = {
+    name: user.githubUsername,
+    avatar: user.githubAvatar,
+  };
+  console.log(user);
   useEffect(() => {
     if (importedRepositories.length === 0) {
       fetchRepositories();
@@ -73,19 +72,21 @@ const Sidebar = ({
   // Logic to close the Profile Popup when clicking outside
   useEffect(() => {
     const handleClickProfile = (e) => {
-      const isClickInsideProfileArea = profileRef.current && profileRef.current.contains(e.target);
+      const isClickInsideProfileArea =
+        profileRef.current && profileRef.current.contains(e.target);
       if (showProfilePopup && !isClickInsideProfileArea) {
         setShowProfilePopup(false);
       }
     };
-    if (showProfilePopup) document.addEventListener("mousedown", handleClickProfile);
+    if (showProfilePopup)
+      document.addEventListener("mousedown", handleClickProfile);
     return () => document.removeEventListener("mousedown", handleClickProfile);
   }, [showProfilePopup]);
 
   // Handler to toggle the profile popup
   const handleProfileClick = () => {
-    setShowProfilePopup(prev => !prev);
-    setShowRepoModal(false); 
+    setShowProfilePopup((prev) => !prev);
+    setShowRepoModal(false);
   };
 
   return (
@@ -214,51 +215,60 @@ const Sidebar = ({
         </nav>
 
         {/* PROFILE SECTION - MODIFIED FOR NAME AND CHEVRON */}
-        <div
-          className="p-3 border-t border-[#222] relative" 
-          ref={profileRef} 
-        >
+        <div className="p-3 border-t border-[#222] relative" ref={profileRef}>
           <div
             className={`
               cursor-pointer flex items-center justify-between gap-3 p-3 rounded-lg 
               transition-all duration-200 
-              ${showProfilePopup ? 'bg-[#222] border border-[#333]' : 'hover:bg-[#222]'}
+              ${
+                showProfilePopup
+                  ? "bg-[#222] border border-[#333]"
+                  : "hover:bg-[#222]"
+              }
             `}
             onClick={handleProfileClick}
           >
             <div className="flex items-center gap-3">
-                <img
-                    src={profile.avatar}
-                    alt="Profile"
-                    className="w-9 h-9 rounded-full"
-                />
-                <div className="font-medium text-[15px]">
-                    {/* Displaying only the name as requested */}
-                    {profile.name} 
-                </div>
+              <img
+                src={profile.avatar}
+                alt="Profile"
+                className="w-9 h-9 rounded-full"
+              />
+              <div className="font-medium text-[15px]">
+                {/* Displaying only the name as requested */}
+                {profile.name}
+              </div>
             </div>
-            
+
             {/* Chevron symbol (>) */}
             <span className="text-[#bbb]">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={`${showProfilePopup ? 'transform rotate-90' : ''} transition-transform duration-200`}>
-                    <path
-                        d="M7 5l5 5-5 5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                className={`${
+                  showProfilePopup ? "transform rotate-90" : ""
+                } transition-transform duration-200`}
+              >
+                <path
+                  d="M7 5l5 5-5 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </span>
           </div>
-          
+
           {/* PROFILE POPUP - Renders the imported component */}
           {showProfilePopup && (
             <ProfilePopup
               userName={profile.name}
               darkModeEnabled={isDarkMode}
               onClose={() => setShowProfilePopup(false)}
-              onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
+              onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
               onEditProfile={onProfileClick}
             />
           )}
