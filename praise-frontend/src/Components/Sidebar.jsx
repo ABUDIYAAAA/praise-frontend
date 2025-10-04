@@ -89,67 +89,74 @@ const Sidebar = ({
             </span>
           </div>
 
-          {/* DROPDOWN MENU */}
-          {showRepoModal && (
-            <div
-              className="
-    absolute left-55 top-[48px]
-    bg-neutral-900/95 backdrop-blur-md
-    rounded-2xl p-6 min-w-[320px]
-    shadow-[0_8px_30px_rgba(0,0,0,0.5)]
-    border border-white/10
-    z-50 transition-all duration-300
-  "
-            >
-              <div className="mb-4 font-semibold text-lg">
-                Select Repository
-              </div>
-              <ul className="mb-4">
-                {repositoriesList.map((repo) => (
-                  <li
-                    key={repo.name}
-                    className="flex justify-between items-center px-3 py-2 rounded hover:bg-[#333] cursor-pointer"
-                    onClick={() => {
-                      onRepoChange(repo);
-                      setShowRepoModal(false);
-                    }}
-                  >
-                    <span>{repo.name}</span>
-                    <span className="text-xs text-[#bbb] px-2 py-1 rounded bg-[#333] text-center">
-                      {repo.role}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+       {/* DROPDOWN MENU */}
+{showRepoModal && (
+  <div
+    className="
+      absolute left-55 top-[48px]
+      bg-neutral-900/95 backdrop-blur-md
+      rounded-2xl p-6 min-w-[320px]
+      shadow-[0_8px_30px_rgba(0,0,0,0.5)]
+      border border-white/10
+      z-50 transition-all duration-300
+    "
+  >
+    {/* Heading */}
+    <div className="mb-4 text-lg font-semibold text-gray-100 tracking-wide">
+      Select Repository
+    </div>
 
-              <button
-                className="w-full py-2.5 px-4 bg-[#43b96f] text-white text-sm font-normal 
-             rounded-md shadow-sm hover:bg-[#3aa865] 
-             hover:shadow-md active:scale-[0.99] 
-             transition-all duration-200 flex items-center justify-center gap-2"
-                onClick={() => {
-                  setShowRepoModal(false);
-                  setTimeout(() => setShowImportRepo(true), 100); // ⏱ fix render delay
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Add Repository from GitHub
-              </button>
-            </div>
-          )}
+    {/* Repository List */}
+    <ul className="mb-4">
+      {repositoriesList.map((repo) => (
+        <li
+          key={repo.name}
+          className="flex justify-between items-center px-3 py-2 rounded-lg 
+                     hover:bg-neutral-800 cursor-pointer transition-colors duration-200"
+          onClick={() => {
+            onRepoChange(repo);
+            setShowRepoModal(false);
+          }}
+        >
+          {/* Repo Name */}
+          <span className="text-sm text-gray-100 font-medium">
+            {repo.name}
+          </span>
+
+          {/* Role Badge without green background */}
+          <span className="text-xs font-semibold text-gray-400 px-2 py-1 rounded-full border border-gray-600 text-center">
+            {repo.role}
+          </span>
+        </li>
+      ))}
+    </ul>
+
+    {/* Add Repository Button */}
+    <button
+      className="w-full py-2.5 px-4 bg-[#43b96f] text-white text-sm font-normal 
+                 rounded-md shadow-sm hover:bg-[#3aa865] 
+                 hover:shadow-md active:scale-[0.99] 
+                 transition-all duration-200 flex items-center justify-center gap-2"
+      onClick={() => {
+        setShowRepoModal(false);
+        setTimeout(() => setShowImportRepo(true), 100); // ⏱ fix render delay
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={2}
+        stroke="currentColor"
+        className="w-4 h-4"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Add Repository from GitHub
+    </button>
+  </div>
+)}
+
         </div>
 
         {/* NAV */}
