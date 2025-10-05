@@ -11,19 +11,24 @@ const Sidebar = ({
   repoIcon = "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
   onProfileClick = () => {},
   onRepoChange = () => {},
+  onSectionChange = () => {},
 }) => {
   // --- STATE FOR VISIBILITY AND THEME ---
   const [showRepoModal, setShowRepoModal] = useState(false);
   const [showImportRepo, setShowImportRepo] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeSection, setActiveSection] = useState("badges"); // Default to badges
 
   // --- REFS FOR CLICK-OUTSIDE LOGIC ---
   const repoRef = useRef(null);
   const profileRef = useRef(null);
 
-  const { repositories: importedRepositories, fetchRepositories } =
-    useRepository();
+  const {
+    repositories: importedRepositories,
+    fetchRepositories,
+    selectedRepository,
+  } = useRepository();
   const { user, logout } = useAuth();
   const profile = {
     name: user.githubUsername,
@@ -201,15 +206,39 @@ const Sidebar = ({
             </div>
           )}
         </div>
-        {/* NAV (Intact) */}
+        {/* NAV (Conditional based on selected repository) */}
         <nav className="flex-1 pt-8">
           <ul className="list-none p-0 m-0">
-            <li className="px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222]">
-              Badges
-            </li>
-            <li className="px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222]">
-              Communities
-            </li>
+            {selectedRepository && (
+              <>
+                <li
+                  className={`px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222] ${
+                    activeSection === "badges"
+                      ? "bg-[#222] border-r-2 border-[#00ffe7]"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setActiveSection("badges");
+                    onSectionChange("badges");
+                  }}
+                >
+                  Badges
+                </li>
+                <li
+                  className={`px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222] ${
+                    activeSection === "communities"
+                      ? "bg-[#222] border-r-2 border-[#00ffe7]"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setActiveSection("communities");
+                    onSectionChange("communities");
+                  }}
+                >
+                  Communities
+                </li>
+              </>
+            )}
           </ul>
         </nav>
         {/* PROFILE SECTION - MODIFIED FOR NAME AND CHEVRON */}
@@ -275,11 +304,7 @@ const Sidebar = ({
 
       {/* IMPORT REPO MODAL (Intact) */}
       {showImportRepo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-[#1f1f1f] rounded-lg p-6 w-[500px] relative">
-            <ImportRepo onClose={() => setShowImportRepo(false)} />
-          </div>
-        </div>
+        <ImportRepo onClose={() => setShowImportRepo(false)} />
       )}
     </>
   );

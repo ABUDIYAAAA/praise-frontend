@@ -97,7 +97,7 @@ const ImportRepo = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/30">
       <div
         ref={modalRef}
         className="bg-neutral-950/90 backdrop-blur-md text-white rounded-2xl p-6 w-full max-w-4xl border border-neutral-800 shadow-[0_0_25px_rgba(0,255,231,0.15)]"

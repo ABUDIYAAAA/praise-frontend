@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 // --- ICON COMPONENTS (Unchanged) ---
 const ProfileIcon = () => (
@@ -72,6 +72,40 @@ const MenuItem = ({
   </div>
 );
 
+// --- CONFIRMATION MODAL COMPONENT ---
+const ConfirmationModal = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center z-[100]">
+      <div className="bg-[#1a1a1a] rounded-xl shadow-xl border border-white/10 p-6 max-w-md w-full mx-4">
+        <h3 className="text-white text-lg font-semibold mb-4">
+          Confirm Logout
+        </h3>
+        <p className="text-gray-300 mb-6">
+          Are you sure you want to log out? You'll need to sign in again to
+          access your dashboard.
+        </p>
+
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium"
+          >
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- PROFILE POPUP COMPONENT (Modified) ---
 const ProfilePopup = ({
   userName = "Nimit",
@@ -80,10 +114,32 @@ const ProfilePopup = ({
   popupRef,
 }) => {
   const { logout } = useAuth();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    logout();
+    setShowConfirmModal(false);
+    if (onLogout) onLogout();
+  };
+
+  const handleCancelLogout = () => {
+    setShowConfirmModal(false);
+  };
+
   return (
-    <div
-      ref={popupRef}
-      className={`
+    <>
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
+      <div
+        ref={popupRef}
+        className={`
         absolute bottom-full left-0 mb-3 
         w-full 
         px-2 
@@ -93,33 +149,20 @@ const ProfilePopup = ({
         transition-all duration-300 ease-out 
         opacity-100 scale-100 
       `}
-    >
-      {/* INNER POPUP CONTAINER */}
-      <div className="bg-[#1a1a1a] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden">
-        {/* MENU ITEMS (Log out) */}
-        <nav className="py-1">
-          <MenuItem
-            icon={<LogOutIcon />}
-            label="Log out"
-            onClick={() => {
-              logout();
-            }}
-          />
-        </nav>
-
-        {/* Footer Section (Your Name) */}
-        <div
-          className="flex items-center justify-start p-3 bg-[#222222] border-t border-white/10"
-          style={{ padding: "12px 16px" }}
-        >
-          <div className="flex items-center gap-4 text-white">
-            <ProfileIcon />
-            {/* Removed 'font-semibold text-lg' to inherit font style from parent, keeping only 'font-medium' for weight consistency */}
-            <span className="font-medium">{userName}</span>
-          </div>
+      >
+        {/* INNER POPUP CONTAINER */}
+        <div className="bg-[#1a1a1a] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden">
+          {/* MENU ITEMS (Log out) */}
+          <nav className="py-1">
+            <MenuItem
+              icon={<LogOutIcon />}
+              label="Log out"
+              onClick={handleLogoutClick}
+            />
+          </nav>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

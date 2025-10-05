@@ -15,11 +15,12 @@ import { useBadge } from "../context/BadgeContext";
 import BadgeCelebration from "./BadgeCelebration";
 import ContributionCharts from "./ContributionCharts";
 import useBadgeProgress from "../hooks/useBadgeProgress";
+import { useAuth } from "../context/AuthContext";
 
 const Milestones = () => {
   const [mode] = useState("Pull Requests"); // Fixed to PRs only
   const [isOpen, setIsOpen] = useState(false);
-
+  const { user } = useAuth();
   const { selectedRepository } = useRepository();
   const { unlockedBadges, showBadgePopup, hideBadgePopup } = useBadge();
   const {
@@ -61,15 +62,48 @@ const Milestones = () => {
     img: getImageForBadge(badge),
   }));
 
-  // Logic to determine the next pending milestone and progress
-  const nextMilestone = milestones.find((m) => !m.active);
+  // Push logic: Auto-mark badges as completed based on current PRs
+  const currentPRs = userStats?.totalPRs || 0;
+
+  // Update milestones with push logic
+  const updatedMilestones = milestones.map((milestone) => ({
+    ...milestone,
+    active: currentPRs >= milestone.criteriaValue || milestone.active,
+  }));
+
+  // Find the next uncompleted milestone
+  const nextMilestone = updatedMilestones.find((m) => !m.active);
   const nextTarget = nextMilestone
     ? nextMilestone.criteriaValue
-    : userStats?.totalPRs || 0;
-  const currentPRs = userStats?.totalPRs || 0;
-  const progressPercent = nextMilestone
-    ? Math.min(100, (currentPRs / nextTarget) * 100)
-    : 100;
+    : updatedMilestones[updatedMilestones.length - 1]?.criteriaValue || 0;
+
+  // Calculate progress towards next milestone
+  const previousMilestone = nextMilestone
+    ? updatedMilestones[
+        updatedMilestones.findIndex((m) => m.id === nextMilestone.id) - 1
+      ]
+    : updatedMilestones[updatedMilestones.length - 1];
+
+  const previousTarget = previousMilestone?.criteriaValue || 0;
+  const progressStart = previousTarget;
+  const progressRange = nextTarget - progressStart;
+  const currentProgress = currentPRs - progressStart;
+
+  // Progress calculation with push logic - jumps to next when 100%
+  let progressPercent;
+  if (!nextMilestone) {
+    // All badges completed
+    progressPercent = 100;
+  } else if (currentPRs >= nextTarget) {
+    // Current badge should be completed, but showing 100% briefly before jumping
+    progressPercent = 100;
+  } else {
+    // Normal progress calculation
+    progressPercent = Math.min(
+      100,
+      Math.max(0, (currentProgress / progressRange) * 100)
+    );
+  }
 
   // PR chart data (last 50 PRs)
   const prChartData = prActivity.map((item) => ({
@@ -137,25 +171,50 @@ const Milestones = () => {
       <div className="w-full max-w-6xl mb-12 p-6 bg-gray-900/70 border border-gray-800 rounded-2xl shadow-xl flex flex-col md:flex-row gap-6">
         {/* Left Side: Content from the Provided Picture */}
         <div className="flex-1 p-6 bg-gray-800 rounded-xl border border-gray-700/50 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-700 rounded-lg flex-shrink-0">
-            {/* Placeholder for an image/avatar */}
+          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
+            <img
+              src={user.githubAvatar}
+              className="w-full h-full object-cover rounded-lg"
+              alt="Profile"
+            />
           </div>
           <div className="flex flex-col items-center sm:items-start flex-grow">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Name
+              {user.githubUsername}
             </h2>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
-              <span className="text-gray-400 text-lg">Badge name</span>
-            </div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
-              <span className="text-gray-400 text-lg">Badge name</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
-              <span className="text-gray-400 text-lg">Badge name</span>
-            </div>
+            {/* Show first 3 milestones with their completion status */}
+            {updatedMilestones.slice(0, 3).map((milestone, index) => (
+              <div key={milestone.id} className="flex items-center gap-3 mb-2">
+                <div
+                  className={`w-5 h-5 rounded-sm flex items-center justify-center ${
+                    milestone.active ? "bg-[#00ffe7] text-black" : "bg-gray-600"
+                  }`}
+                >
+                  {milestone.active && (
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <span
+                  className={`text-lg ${
+                    milestone.active
+                      ? "text-white font-medium"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {milestone.title}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -185,7 +244,7 @@ const Milestones = () => {
             ></div>
           </div>
           <div className="flex justify-between mt-2 text-sm">
-            <span className="text-gray-400">{currentPRs} PRs</span>
+            <span className="text-gray-400">{progressStart} PRs</span>
             <span
               className="font-semibold"
               style={{ color: progressPercent >= 100 ? "#4ADE80" : "#00ffe7" }}
@@ -209,10 +268,10 @@ const Milestones = () => {
             visible: { transition: { staggerChildren: 0.08 } },
           }}
         >
-          {milestones.map((m, i) => {
+          {updatedMilestones.map((m, i) => {
             const isOwner = userRole === "owner";
             const showActive = isOwner || m.active;
-            const nextInactiveIndex = milestones.findIndex(
+            const nextInactiveIndex = updatedMilestones.findIndex(
               (milestone) => !milestone.active
             );
 
@@ -240,16 +299,16 @@ const Milestones = () => {
                       boxShadow: "0 0 20px rgba(0,255,231,0.6)",
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative bg-gray-800 cursor-pointer ${
+                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative bg-gray-800 cursor-pointer transition-all duration-500 ${
                       showActive
-                        ? "border-4 border-[#00ffe7] shadow-[0_0_12px_rgba(0,255,231,0.5)]"
+                        ? "border-4 border-[#00ffe7] shadow-[0_0_20px_rgba(0,255,231,0.6),0_0_40px_rgba(0,255,231,0.3)]"
                         : "border-2 border-gray-700"
                     }`}
                   >
                     <img
                       src={m.img}
                       alt={m.title}
-                      className={`object-contain w-10 h-10 sm:w-12 sm:h-12 ${
+                      className={`object-contain w-10 h-10 sm:w-12 sm:h-12 transition-all duration-500 ${
                         showActive ? "opacity-100" : "opacity-50 grayscale"
                       }`}
                     />
@@ -267,7 +326,7 @@ const Milestones = () => {
                 </motion.div>
 
                 {/* Timeline Line */}
-                {i < milestones.length - 1 && (
+                {i < updatedMilestones.length - 1 && (
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -279,9 +338,14 @@ const Milestones = () => {
                     }}
                     className="h-1 flex-1 origin-left rounded-full relative"
                   >
-                    <div className="absolute inset-0 bg-gray-700 rounded-full"></div>
-                    {i < nextInactiveIndex && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#00ffe7] to-[#00bfa5] rounded-full shadow-[0_0_6px_#00ffe7]"></div>
+                    <div className="absolute inset-0 bg-gray-700 rounded-full transition-all duration-500"></div>
+                    {(isOwner || updatedMilestones[i + 1].active) && (
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.8, delay: i * 0.1 + 0.2 }}
+                        className="absolute inset-0 bg-gradient-to-r from-[#00ffe7] to-[#00bfa5] rounded-full shadow-[0_0_8px_#00ffe7] origin-left"
+                      ></motion.div>
                     )}
                   </motion.div>
                 )}
