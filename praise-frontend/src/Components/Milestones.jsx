@@ -166,11 +166,11 @@ const Milestones = () => {
               <React.Fragment key={m.id || i}>
                 <div className="flex flex-col items-center text-center flex-1 min-w-[80px]">
                   <motion.div
-                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative ${
+                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative bg-gray-800 ${
                       shouldShowActive
-                        ? "bg-[#00ffe7]/20 border-2 border-[#00ffe7]"
-                        : "bg-gray-800 border border-gray-700"
-                    } shadow-[0_4px_12px_rgba(0,255,231,0.1)]`}
+                        ? "border-2 border-[#00ffe7] shadow-[0_0_20px_rgba(0,255,231,0.3)]"
+                        : "border border-gray-700"
+                    }`}
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.3 }}
                   >
