@@ -1,13 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRepository } from "../context/RepositoryContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 import Milestones from "../Components/Milestones";
+
 const HomePage = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, checkAuth, setAuthToken } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { selectRepository } = useRepository();
   const navigate = useNavigate();
+
+  // Handle OAuth token from URL
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      console.log("🎫 Token received from OAuth callback:", token);
+
+      // Store the token using AuthContext method
+      setAuthToken(token);
+
+      // Clear token from URL
+      setSearchParams({});
+
+      // Re-check authentication to get user data
+      checkAuth();
+    }
+  }, [searchParams, setSearchParams, checkAuth, setAuthToken]);
 
   const handleLogout = async () => {
     const result = await logout();

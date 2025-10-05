@@ -8,6 +8,37 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5175";
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 
+// Token management utilities
+const getStoredToken = () => {
+  try {
+    return localStorage.getItem("authToken");
+  } catch (error) {
+    console.error("Error reading token from localStorage:", error);
+    return null;
+  }
+};
+
+const setStoredToken = (token) => {
+  try {
+    if (token) {
+      localStorage.setItem("authToken", token);
+      // Set Authorization header for future requests
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      localStorage.removeItem("authToken");
+      delete axios.defaults.headers.common["Authorization"];
+    }
+  } catch (error) {
+    console.error("Error storing token:", error);
+  }
+};
+
+// Initialize axios with stored token if available
+const storedToken = getStoredToken();
+if (storedToken) {
+  axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -25,13 +56,22 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       setLoading(true);
+      console.log("🔍 Checking authentication with:", API_URL);
+      console.log("🍪 Current cookies:", document.cookie);
+
       const response = await axios.get("/auth/me");
 
       if (response.data.success) {
+        console.log("✅ Authentication successful:", response.data.data);
         setUser(response.data.data);
       }
     } catch (error) {
-      console.log("Not authenticated:", error.response?.data?.message);
+      console.log(
+        "❌ Not authenticated:",
+        error.response?.data?.message || error.message
+      );
+      console.log("📊 Response status:", error.response?.status);
+      console.log("🔗 Request URL:", error.config?.url);
       setUser(null);
     } finally {
       setLoading(false);
@@ -49,6 +89,9 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       await axios.post("/auth/logout");
+
+      // Clear stored token and user state
+      setStoredToken(null);
       setUser(null);
       setError(null);
       return { success: true };
@@ -80,6 +123,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Set token manually (for OAuth callback)
+  const setAuthToken = (token) => {
+    setStoredToken(token);
+  };
+
   // Clear error function
   const clearError = () => {
     setError(null);
@@ -98,6 +146,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     getCurrentUser,
     checkAuth,
+    setAuthToken,
     clearError,
     isAuthenticated: !!user,
   };

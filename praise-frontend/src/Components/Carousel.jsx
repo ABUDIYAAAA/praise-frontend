@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 
 const AutoCarousel = () => {
   const items = [
-    { id: 1, text: "🏅 Earn badges that showcase your contributions" },
-    { id: 2, text: "📊 Instantly view your live project statistics" },
-    { id: 3, text: "🎨 Customise and style badges for your repositories" },
-    { id: 4, text: "🤝 Connect seamlessly with Discord or Slack" },
+    { id: 1, text: "Earn badges that showcase your contributions" },
+    { id: 2, text: "Instantly view your live project statistics" },
+    { id: 3, text: "Customise and style badges for your repositories" },
+    { id: 4, text: "Connect seamlessly with Discord or Slack" },
   ];
 
   const [current, setCurrent] = useState(0);
