@@ -206,10 +206,10 @@ const Sidebar = ({
         <nav className="flex-1 pt-8">
           <ul className="list-none p-0 m-0">
             <li className="px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222]">
-              🏅 Badges
+              Badges
             </li>
             <li className="px-8 py-3 cursor-pointer font-medium text-base transition-colors hover:bg-[#222]">
-              👥 Communities
+              Communities
             </li>
           </ul>
         </nav>

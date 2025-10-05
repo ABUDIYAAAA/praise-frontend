@@ -1,10 +1,12 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRepository } from "../context/RepositoryContext";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 import Milestones from "../Components/Milestones";
 const HomePage = () => {
   const { user, logout, loading } = useAuth();
+  const { selectRepository } = useRepository();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -46,10 +48,15 @@ const HomePage = () => {
     );
   }
 
+  const handleRepoChange = (repo) => {
+    console.log("Repository selected:", repo);
+    selectRepository(repo);
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onRepoChange={handleRepoChange} />
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 gap-8 ml-[260px]">

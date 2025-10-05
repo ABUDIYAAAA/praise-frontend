@@ -97,7 +97,7 @@ const ImportRepo = ({ onClose }) => {
   };
 
   return (
-    <div className="text-white bg-[#1f1f1f] rounded-lg p-6 w-full max-w-4xl">
+    <div className="text-white rounded-lg p-6 w-full max-w-4xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
