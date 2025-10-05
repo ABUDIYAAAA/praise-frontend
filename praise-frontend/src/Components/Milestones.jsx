@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -11,16 +10,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import useBadgeProgress from "../hooks/useBadgeProgress";
 import { useRepository } from "../context/RepositoryContext";
 import { useBadge } from "../context/BadgeContext";
 import BadgeCelebration from "./BadgeCelebration";
 import ContributionCharts from "./ContributionCharts";
-
-const modes = ["Pull Requests", "Commits", "Issues Resolved"];
+import useBadgeProgress from "../hooks/useBadgeProgress";
 
 const Milestones = () => {
-  const [mode, setMode] = useState("Pull Requests");
+  const [mode] = useState("Pull Requests"); // Fixed to PRs only
   const [isOpen, setIsOpen] = useState(false);
 
   const { selectedRepository } = useRepository();
@@ -35,50 +32,50 @@ const Milestones = () => {
     chartData,
   } = useBadgeProgress(selectedRepository?.id);
 
-  console.log("Milestones - selectedRepository:", selectedRepository);
-  console.log("Milestones - badgeProgress:", badgeProgress);
-
-  // Create image mapping based on criteria values
+  // Badge image mapping
   const getImageForBadge = (badge) => {
     if (badge.criteriaType === "prs") {
       switch (badge.criteriaValue) {
         case 1:
-          return "/images/8.png"; // First PR
+          return "/images/8.png";
         case 5:
-          return "/images/9.png"; // 5 PRs
+          return "/images/9.png";
         case 20:
-          return "/images/10.png"; // 20 PRs
+          return "/images/10.png";
         default:
-          return "/images/11.png"; // Other PR milestones
+          return "/images/11.png";
       }
-    } else if (badge.criteriaType === "commits") {
-      return "/images/11.png"; // Commits get image 11
     }
-    return "/images/8.png"; // Default fallback
+    return "/images/11.png";
   };
 
-  // Transform badge progress data for display
   const milestones = badgeProgress.map((badge) => ({
     id: badge._id,
-    level: `${badge.criteriaValue} ${badge.criteriaType.toUpperCase()}`,
+    level: `${badge.criteriaValue} PRs`,
     title: badge.name,
     description: badge.description,
     active: badge.isAwarded,
-    progress: badge.progress,
     currentValue: badge.currentValue,
     criteriaValue: badge.criteriaValue,
     icon: badge.icon,
-    color: badge.color,
     img: getImageForBadge(badge),
   }));
 
-  // Transform PR activity data for chart
+  // Logic to determine the next pending milestone and progress
+  const nextMilestone = milestones.find((m) => !m.active);
+  const nextTarget = nextMilestone ? nextMilestone.criteriaValue : userStats?.totalPRs || 0;
+  const currentPRs = userStats?.totalPRs || 0;
+  const progressPercent = nextMilestone 
+    ? Math.min(100, (currentPRs / nextTarget) * 100) 
+    : 100;
+  
+  // PR chart data (last 50 PRs)
   const prChartData = prActivity.map((item) => ({
     date: new Date(item._id).getDate().toString().padStart(2, "0"),
     prs: item.count,
   }));
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">
@@ -87,9 +84,8 @@ const Milestones = () => {
         </div>
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">
@@ -103,9 +99,8 @@ const Milestones = () => {
         </div>
       </div>
     );
-  }
 
-  if (!selectedRepository) {
+  if (!selectedRepository)
     return (
       <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">
@@ -118,166 +113,198 @@ const Milestones = () => {
         </div>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex flex-col items-center overflow-x-hidden px-6 sm:px-10 py-12">
       {/* Header */}
-      <div className="w-full max-w-6xl flex flex-col sm:flex-row justify-between items-center gap-6 mb-12">
+      <div className="w-full max-w-6xl flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-center sm:text-left">
             Milestones
           </h1>
           <p className="text-gray-400 mt-1">{selectedRepository.name}</p>
         </div>
-        <div className="relative">
-          {isOpen && (
-            <div className="absolute right-0 mt-2 bg-[#1a1a1a] border border-[#00ffe7]/20 rounded-lg overflow-hidden shadow-lg z-10 w-40">
-              {modes.map((m) => (
-                <div
-                  key={m}
-                  onClick={() => {
-                    setMode(m);
-                    setIsOpen(false);
-                  }}
-                  className="px-4 py-2 cursor-pointer hover:bg-[#00ffe7]/10 text-sm transition-colors"
-                >
-                  {m}
-                </div>
-              ))}
+      </div>
+
+      {/* NEW Progress/Summary Box (Now with custom left content) */}
+      <div className="w-full max-w-6xl mb-12 p-6 bg-gray-900/70 border border-gray-800 rounded-2xl shadow-xl flex flex-col md:flex-row gap-6">
+        {/* Left Side: Content from the Provided Picture */}
+        <div className="flex-1 p-6 bg-gray-800 rounded-xl border border-gray-700/50 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-700 rounded-lg flex-shrink-0">
+            {/* Placeholder for an image/avatar */}
+          </div>
+          <div className="flex flex-col items-center sm:items-start flex-grow">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+              Name
+            </h2>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
+              <span className="text-gray-400 text-lg">Badge name</span>
             </div>
-          )}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
+              <span className="text-gray-400 text-lg">Badge name</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-gray-600 rounded-sm"></div>
+              <span className="text-gray-400 text-lg">Badge name</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Next Milestone Progress (remains the same) */}
+        <div className="flex-1 p-4 bg-gray-800 rounded-xl border border-gray-700/50 flex flex-col justify-between">
+          <h2 className="text-xl font-semibold mb-4 text-[#00ffe7]">
+            Next Milestone Progress
+          </h2>
+          <div>
+            <p className="text-lg font-medium text-gray-300">
+              Target: <span className="text-white font-bold">{nextMilestone ? nextMilestone.title : "All Unlocked!"}</span>
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              {nextMilestone ? `Reach ${nextTarget} PRs to unlock the next badge.` : "You've earned every badge available!"}
+            </p>
+          </div>
+          
+          <div className="w-full bg-gray-700 rounded-full h-3">
+            <div 
+              className="bg-gradient-to-r from-[#00ffe7] to-[#00bfa5] h-3 rounded-full transition-all duration-700 shadow-[0_0_6px_#00ffe7]"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between mt-2 text-sm">
+            <span className="text-gray-400">
+              {currentPRs} PRs
+            </span>
+            <span className="font-semibold" style={{ color: progressPercent >= 100 ? '#4ADE80' : '#00ffe7' }}>
+              {progressPercent.toFixed(1)}% Complete
+            </span>
+            <span className="text-gray-400">
+              {nextTarget} PRs
+            </span>
+          </div>
         </div>
       </div>
+      {/* END NEW BOX */}
 
       {/* Timeline */}
       <div className="relative w-full max-w-6xl flex flex-col items-center overflow-hidden">
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-6 sm:gap-4 w-full px-2 sm:px-0">
+        <motion.div
+          className="flex flex-wrap items-center justify-center sm:justify-between gap-8 sm:gap-4 w-full px-2 sm:px-0"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08 } },
+          }}
+        >
           {milestones.map((m, i) => {
-            // For owners: show all milestones with green line to the end
-            // For contributors: show green line only up to their current progress
             const isOwner = userRole === "owner";
-            const shouldShowActive = isOwner || m.active;
-            const shouldShowProgressLine =
-              isOwner ||
-              i < milestones.findIndex((milestone) => !milestone.active);
+            const showActive = isOwner || m.active;
+            const nextInactiveIndex = milestones.findIndex(
+              (milestone) => !milestone.active
+            );
+
+            const dotVariants = {
+              hidden: { scale: 0.6, opacity: 0, y: 20 },
+              visible: {
+                scale: 1,
+                opacity: 1,
+                y: 0,
+                transition: { type: "spring", stiffness: 250, damping: 25 },
+              },
+            };
 
             return (
               <React.Fragment key={m.id || i}>
-                <div className="flex flex-col items-center text-center flex-1 min-w-[80px]">
+                {/* Timeline Dot */}
+                <motion.div
+                  variants={dotVariants}
+                  className="flex flex-col items-center text-center flex-1 min-w-[80px] relative mt-4"
+                >
                   <motion.div
-                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative bg-gray-800 ${
-                      shouldShowActive
-                        ? "border-2 border-[#00ffe7] shadow-[0_0_20px_rgba(0,255,231,0.3)]"
-                        : "border border-gray-700"
+                    whileHover={{
+                      y: -4,
+                      scale: 1.1,
+                      boxShadow: "0 0 20px rgba(0,255,231,0.6)",
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center overflow-hidden relative bg-gray-800 cursor-pointer ${
+                      showActive
+                        ? "border-4 border-[#00ffe7] shadow-[0_0_12px_rgba(0,255,231,0.5)]"
+                        : "border-2 border-gray-700"
                     }`}
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
                   >
-                    {/* Badge image */}
                     <img
                       src={m.img}
                       alt={m.title}
                       className={`object-contain w-10 h-10 sm:w-12 sm:h-12 ${
-                        shouldShowActive
-                          ? "opacity-100"
-                          : "opacity-50 grayscale"
+                        showActive ? "opacity-100" : "opacity-50 grayscale"
                       }`}
-                      onError={(e) => {
-                        // Fallback to emoji if image fails to load
-                        e.target.style.display = "none";
-                        e.target.nextSibling.style.display = "block";
-                      }}
                     />
-                    <div
-                      className={`text-2xl sm:text-3xl hidden ${
-                        shouldShowActive
-                          ? "opacity-100"
-                          : "opacity-50 grayscale"
-                      }`}
-                    >
-                      {m.icon || "🏆"}
-                    </div>
-
-                    {/* Progress ring for contributors */}
-                    {!isOwner && !m.active && m.progress > 0 && (
-                      <div
-                        className="absolute inset-0 rounded-full border-2 border-[#00ffe7]/50"
-                        style={{
-                          background: `conic-gradient(#00ffe7 ${
-                            m.progress * 3.6
-                          }deg, transparent ${m.progress * 3.6}deg)`,
-                        }}
-                      />
-                    )}
                   </motion.div>
 
+                  {/* Level & Title */}
                   <p
                     className={`mt-2 font-semibold text-xs sm:text-sm ${
-                      shouldShowActive ? "text-[#00ffe7]" : "text-gray-400"
+                      showActive ? "text-[#00ffe7]" : "text-gray-400"
                     }`}
                   >
                     {m.level}
                   </p>
                   <p className="text-xs text-gray-500">{m.title}</p>
+                </motion.div>
 
-                  {/* Show progress for contributors */}
-                  {!isOwner && !m.active && (
-                    <p className="text-xs text-[#00ffe7]/70 mt-1">
-                      {m.currentValue}/{m.criteriaValue}
-                    </p>
-                  )}
-                </div>
-
+                {/* Timeline Line */}
                 {i < milestones.length - 1 && (
                   <motion.div
-                    className={`h-1 flex-1 ${
-                      shouldShowProgressLine ? "bg-[#00ffe7]" : "bg-gray-700"
-                    }`}
-                    layout
-                    transition={{ duration: 0.5 }}
-                  />
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30,
+                      delay: i * 0.08,
+                    }}
+                    className="h-1 flex-1 origin-left rounded-full relative"
+                  >
+                    <div className="absolute inset-0 bg-gray-700 rounded-full"></div>
+                    {i < nextInactiveIndex && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#00ffe7] to-[#00bfa5] rounded-full shadow-[0_0_6px_#00ffe7]"></div>
+                    )}
+                  </motion.div>
                 )}
               </React.Fragment>
             );
           })}
-        </div>
+        </motion.div>
 
+        {/* Owner Edit Button */}
         {userRole === "owner" && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             className="mt-14 px-6 py-3 rounded-xl bg-[#00ffe7]/20 border border-[#00ffe7]/40 text-[#00ffe7] hover:bg-[#00ffe7]/30 transition-all duration-300"
           >
-            ✏️ Edit Milestones
+            Edit Milestones
           </motion.button>
         )}
       </div>
 
-      {/* Chart Section */}
+      {/* PR Activity Chart */}
       {prChartData.length > 0 && (
         <div className="w-full max-w-6xl mt-16 bg-gray-900 p-6 rounded-2xl shadow-lg">
           <h2 className="text-gray-200 text-lg mb-4 text-center">
-            {mode} Activity - Last 30 Days
+            Pull Requests Activity - Last 30 Days
           </h2>
           <div className="mb-4 text-center">
             <div className="inline-flex gap-4 text-sm text-gray-400">
               <span>
                 Total PRs:{" "}
-                <span className="text-[#00ffe7]">
-                  {userStats?.totalPRs || 0}
-                </span>
+                <span className="text-[#00ffe7]">{userStats?.totalPRs || 0}</span>
               </span>
               <span>
                 Merged:{" "}
-                <span className="text-green-400">
-                  {userStats?.mergedPRs || 0}
-                </span>
-              </span>
-              <span>
-                Commits:{" "}
-                <span className="text-blue-400">
-                  {userStats?.totalCommits || 0}
-                </span>
+                <span className="text-green-400">{userStats?.mergedPRs || 0}</span>
               </span>
             </div>
           </div>
@@ -302,7 +329,7 @@ const Milestones = () => {
               <Bar
                 dataKey="prs"
                 fill="#00ffe7"
-                name={mode}
+                name="Pull Requests"
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>
@@ -320,9 +347,7 @@ const Milestones = () => {
       {/* No Data Message */}
       {prChartData.length === 0 && !chartData && (
         <div className="w-full max-w-6xl mt-16 bg-gray-900 p-8 rounded-2xl shadow-lg text-center">
-          <p className="text-gray-400 text-lg">
-            No activity data available yet
-          </p>
+          <p className="text-gray-400 text-lg">No activity data available yet</p>
           <p className="text-gray-500 text-sm mt-2">
             Start contributing to see your progress!
           </p>

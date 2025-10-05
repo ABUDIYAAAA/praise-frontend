@@ -172,32 +172,33 @@ const Sidebar = ({
               </ul>
 
               {/* Add Repository Button */}
-              <button
-                className="w-full py-2.5 px-4 bg-[#43b96f] text-white text-sm font-normal 
-                           rounded-md shadow-sm hover:bg-[#3aa865] 
-                           hover:shadow-md active:scale-[0.99] 
-                           transition-all duration-200 flex items-center justify-center gap-2"
-                onClick={() => {
-                  setShowRepoModal(false);
-                  setTimeout(() => setShowImportRepo(true), 100);
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Add Repository from GitHub
-              </button>
+            <button
+  className="w-full py-2.5 px-4 bg-[#00FFE7] text-black text-sm font-normal 
+             rounded-md shadow-sm hover:bg-[#00BFA5] 
+             hover:shadow-md active:scale-[0.99] 
+             transition-all duration-200 flex items-center justify-center gap-2"
+  onClick={() => {
+    setShowRepoModal(false);
+    setTimeout(() => setShowImportRepo(true), 100);
+  }}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className="w-4 h-4"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 4v16m8-8H4"
+    />
+  </svg>
+  Add Repository from GitHub
+</button>
+
             </div>
           )}
         </div>

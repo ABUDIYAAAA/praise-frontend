@@ -13,8 +13,6 @@ import {
   Cell,
   AreaChart,
   Area,
-  LineChart,
-  Line,
 } from "recharts";
 
 const ContributionCharts = ({ chartData, userStats }) => {
@@ -22,21 +20,29 @@ const ContributionCharts = ({ chartData, userStats }) => {
 
   // Prepare data for different chart types
   const contributionBreakdown = [
-    { name: "Merged PRs", value: userStats.mergedPRs || 0, color: "#10B981" },
-    { name: "Open PRs", value: userStats.openPRs || 0, color: "#3B82F6" },
-    { name: "Closed PRs", value: userStats.closedPRs || 0, color: "#EF4444" },
+    { name: "Merged PRs", value: userStats.mergedPRs || 0, color: "#00FFE7" },
+    {
+      name: "Open PRs",
+      value: userStats.openPRs || 0,
+      color: "rgba(0,255,231,0.6)",
+    },
+    {
+      name: "Closed PRs",
+      value: userStats.closedPRs || 0,
+      color: "rgba(0,255,231,0.3)",
+    },
   ].filter((item) => item.value > 0);
 
   const codeContributions = [
     {
       name: "Additions",
       value: userStats.totalAdditions || 0,
-      color: "#10B981",
+      color: "#00FFE7",
     },
     {
       name: "Deletions",
       value: userStats.totalDeletions || 0,
-      color: "#EF4444",
+      color: "rgba(0,255,231,0.4)",
     },
   ].filter((item) => item.value > 0);
 
@@ -46,30 +52,29 @@ const ContributionCharts = ({ chartData, userStats }) => {
     { category: "Lines Changed", count: userStats.totalLinesChanged || 0 },
   ];
 
-  // Badge progress data
   const badgeProgressData = [
     {
       name: "Earned",
       value: chartData.badgeStats?.earnedBadges || 0,
-      color: "#10B981",
+      color: "#00FFE7",
     },
     {
       name: "Remaining",
       value:
         (chartData.badgeStats?.totalBadges || 0) -
         (chartData.badgeStats?.earnedBadges || 0),
-      color: "#6B7280",
+      color: "rgba(0,255,231,0.15)",
     },
   ];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-lg">
-          <p className="text-gray-200 font-medium">{label}</p>
+        <div className="bg-[#0a0a0a] border border-[#00ffe7]/40 rounded-lg p-3 shadow-[0_0_12px_rgba(0,255,231,0.2)]">
+          <p className="text-[#00ffe7] font-semibold mb-1">{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {entry.value}
+            <p key={index} style={{ color: entry.color || "#e5e7eb" }}>
+              {entry.name}: <span className="font-medium">{entry.value}</span>
             </p>
           ))}
         </div>
@@ -79,19 +84,39 @@ const ContributionCharts = ({ chartData, userStats }) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Contribution Overview */}
-      <div className="bg-gray-900 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">
+      <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#00FFE7]/20 shadow-[0_0_25px_rgba(0,255,231,0.05)]">
+        <h3 className="text-xl font-bold text-[#00FFE7] mb-6 tracking-wide">
           Contribution Overview
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={overviewStats}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="category" stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="count" fill="#00FFE7" radius={[4, 4, 0, 0]} />
+            <defs>
+              <linearGradient id="tealGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#00FFE7" stopOpacity={1} />
+                <stop offset="100%" stopColor="#00FFE7" stopOpacity={0.2} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(0,255,231,0.15)"
+            />
+            <XAxis dataKey="category" stroke="#00FFE7" tickLine={false} />
+            <YAxis stroke="#00FFE7" tickLine={false} />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ fill: "transparent" }} // completely removes overlay
+            />
+
+            <Legend wrapperStyle={{ color: "#00FFE7" }} />
+            <Bar
+              dataKey="count"
+              fill="url(#tealGradient)"
+              radius={[6, 6, 0, 0]}
+              barSize={40}
+              animationDuration={1200}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -100,8 +125,8 @@ const ContributionCharts = ({ chartData, userStats }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* PR Status Breakdown */}
         {contributionBreakdown.length > 0 && (
-          <div className="bg-gray-900 rounded-2xl p-6">
-            <h4 className="text-lg font-semibold text-white mb-4">
+          <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#00FFE7]/20 shadow-[0_0_25px_rgba(0,255,231,0.05)]">
+            <h4 className="text-lg font-semibold text-[#00FFE7] mb-4">
               Pull Request Status
             </h4>
             <ResponsiveContainer width="100%" height={250}>
@@ -112,15 +137,19 @@ const ContributionCharts = ({ chartData, userStats }) => {
                   cy="50%"
                   innerRadius={60}
                   outerRadius={100}
-                  paddingAngle={5}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {contributionBreakdown.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "rgba(0,255,231,0.05)" }} // soft cyan highlight
+                />
+
+                <Legend wrapperStyle={{ color: "#00FFE7" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -128,19 +157,42 @@ const ContributionCharts = ({ chartData, userStats }) => {
 
         {/* Code Changes */}
         {codeContributions.length > 0 && (
-          <div className="bg-gray-900 rounded-2xl p-6">
-            <h4 className="text-lg font-semibold text-white mb-4">
+          <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#00FFE7]/20 shadow-[0_0_25px_rgba(0,255,231,0.05)]">
+            <h4 className="text-lg font-semibold text-[#00FFE7] mb-4">
               Code Changes
             </h4>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={codeContributions} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis type="number" stroke="#9CA3AF" />
-                <YAxis type="category" dataKey="name" stroke="#9CA3AF" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {codeContributions.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="rgba(0,255,231,0.15)"
+                />
+                <XAxis type="number" stroke="#00FFE7" tickLine={false} />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  stroke="#00FFE7"
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "rgba(0,255,231,0.05)" }} // soft cyan highlight
+                />
+
+                <Bar dataKey="count" fill="#00FFE7" radius={[4, 4, 0, 0]}>
+                  {overviewStats.map((_, index) => (
+                    <Cell
+                      key={`bar-${index}`}
+                      fill="#00FFE7"
+                      style={{
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.target.style.filter =
+                          "drop-shadow(0 0 10px #00ffe7)")
+                      }
+                      onMouseLeave={(e) => (e.target.style.filter = "none")}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -148,56 +200,37 @@ const ContributionCharts = ({ chartData, userStats }) => {
           </div>
         )}
 
-        {/* Badge Progress */}
-        <div className="bg-gray-900 rounded-2xl p-6">
-          <h4 className="text-lg font-semibold text-white mb-4">
-            Badge Progress
-          </h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={badgeProgressData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {badgeProgressData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="text-center mt-4">
-            <div className="text-2xl font-bold text-[#00FFE7]">
-              {chartData.badgeStats?.progressPercentage || 0}%
-            </div>
-            <div className="text-gray-400">Completion Rate</div>
-          </div>
-        </div>
-
         {/* Activity Timeline */}
         {chartData.activityTimeline?.prActivity?.length > 0 && (
-          <div className="bg-gray-900 rounded-2xl p-6">
-            <h4 className="text-lg font-semibold text-white mb-4">
+          <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#00FFE7]/20 shadow-[0_0_25px_rgba(0,255,231,0.05)]">
+            <h4 className="text-lg font-semibold text-[#00FFE7] mb-4">
               Recent Activity
             </h4>
             <ResponsiveContainer width="100%" height={250}>
               <AreaChart data={chartData.activityTimeline.prActivity}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="_id" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip content={<CustomTooltip />} />
+                <defs>
+                  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00FFE7" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#00FFE7" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="rgba(0,255,231,0.15)"
+                />
+                <XAxis dataKey="_id" stroke="#00FFE7" />
+                <YAxis stroke="#00FFE7" />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "rgba(0,255,231,0.05)" }} // soft cyan highlight
+                />
+
                 <Area
                   type="monotone"
                   dataKey="count"
                   stroke="#00FFE7"
-                  fill="#00FFE7"
-                  fillOpacity={0.3}
+                  fill="url(#areaFill)"
+                  strokeWidth={2}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -207,36 +240,28 @@ const ContributionCharts = ({ chartData, userStats }) => {
 
       {/* Stats Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-4 border border-blue-500/30">
-          <div className="text-2xl font-bold text-blue-400">
-            {userStats.totalPRs || 0}
+        {[
+          { label: "Total Pull Requests", value: userStats.totalPRs },
+          { label: "Merged PRs", value: userStats.mergedPRs },
+          { label: "Total Commits", value: userStats.totalCommits },
+          { label: "Lines Changed", value: userStats.totalLinesChanged },
+        ].map((stat, idx) => (
+          <div
+            key={idx}
+            className="rounded-xl p-4 bg-gradient-to-br from-[#00FFE7]/10 to-[#00FFE7]/5 border border-[#00FFE7]/30 text-center"
+          >
+            <div className="text-2xl font-bold text-[#00FFE7]">
+              {stat.value?.toLocaleString() || 0}
+            </div>
+            <div className="text-sm text-gray-400">{stat.label}</div>
           </div>
-          <div className="text-sm text-gray-300">Total Pull Requests</div>
-        </div>
-        <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-4 border border-green-500/30">
-          <div className="text-2xl font-bold text-green-400">
-            {userStats.mergedPRs || 0}
-          </div>
-          <div className="text-sm text-gray-300">Merged PRs</div>
-        </div>
-        <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl p-4 border border-purple-500/30">
-          <div className="text-2xl font-bold text-purple-400">
-            {userStats.totalCommits || 0}
-          </div>
-          <div className="text-sm text-gray-300">Total Commits</div>
-        </div>
-        <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 rounded-xl p-4 border border-yellow-500/30">
-          <div className="text-2xl font-bold text-yellow-400">
-            {(userStats.totalLinesChanged || 0).toLocaleString()}
-          </div>
-          <div className="text-sm text-gray-300">Lines Changed</div>
-        </div>
+        ))}
       </div>
 
       {/* Contribution Timeline */}
       {userStats.firstContribution && (
-        <div className="bg-gray-900 rounded-2xl p-6">
-          <h4 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#00FFE7]/20 shadow-[0_0_25px_rgba(0,255,231,0.05)]">
+          <h4 className="text-lg font-semibold text-[#00FFE7] mb-4">
             Contribution Journey
           </h4>
           <div className="flex justify-between items-center text-sm">

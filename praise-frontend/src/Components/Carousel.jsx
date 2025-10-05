@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 
 const AutoCarousel = () => {
   const items = [
-    { id: 1, text: "Slide 1", color: "bg-red-400" },
-    { id: 2, text: "Slide 2", color: "bg-green-400" },
-    { id: 3, text: "Slide 3", color: "bg-blue-400" },
-    { id: 4, text: "Slide 4", color: "bg-yellow-400" },
+    { id: 1, text: "🏅 Earn badges that showcase your contributions" },
+    { id: 2, text: "📊 Instantly view your live project statistics" },
+    { id: 3, text: "🎨 Customise and style badges for your repositories" },
+    { id: 4, text: "🤝 Connect seamlessly with Discord or Slack" },
   ];
 
   const [current, setCurrent] = useState(0);
@@ -15,7 +15,6 @@ const AutoCarousel = () => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % items.length);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [items.length]);
 
@@ -29,13 +28,17 @@ const AutoCarousel = () => {
           transform: `translateX(-${current * (100 / items.length)}%)`,
         }}
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div
             key={item.id}
-            className={`h-64 flex items-center justify-center text-3xl font-bold text-white ${item.color}`}
+            className="h-64 flex flex-col items-center justify-center text-center text-2xl md:text-3xl font-semibold text-gray-800"
             style={{ width: `${100 / items.length}%` }}
           >
-            {item.text}
+            <span className="text-blue-500 text-sm font-mono mb-2">
+              {String(index + 1).padStart(2, "0")} /{" "}
+              {String(items.length).padStart(2, "0")}
+            </span>
+            <span>{item.text}</span>
           </div>
         ))}
       </div>
@@ -45,8 +48,8 @@ const AutoCarousel = () => {
         {items.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full ${
-              current === index ? "bg-black" : "bg-gray-400"
+            className={`w-3 h-3 rounded-full transition-colors ${
+              current === index ? "bg-blue-600" : "bg-gray-400"
             }`}
             onClick={() => setCurrent(index)}
           />
