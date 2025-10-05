@@ -96,7 +96,7 @@ const Sidebar = ({
         {/* TOP SECTION (Intact) */}
         <div className="p-8 pb-6 border-b border-[#222] relative" ref={repoRef}>
           <div
-            className="flex items-center gap-4 cursor-pointer"
+            className="flex items-center gap-4 cursor-pointer rounded-lg transition-colors duration-200 hover:bg-[#222] px-4 py-2"
             onClick={() => setShowRepoModal((prev) => !prev)}
           >
             <img
@@ -172,37 +172,35 @@ const Sidebar = ({
               </ul>
 
               {/* Add Repository Button */}
-            <button
-  className="w-full py-2.5 px-4 bg-[#00FFE7] text-black text-sm font-normal 
+              <button
+                className="w-full py-2.5 px-4 bg-[#00FFE7] text-black text-sm font-normal 
              rounded-md shadow-sm hover:bg-[#00BFA5] 
              hover:shadow-md active:scale-[0.99] 
-             transition-all duration-200 flex items-center justify-center gap-2"
-  onClick={() => {
-    setShowRepoModal(false);
-    setTimeout(() => setShowImportRepo(true), 100);
-  }}
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-4 h-4"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 4v16m8-8H4"
-    />
-  </svg>
-  Add Repository from GitHub
-</button>
-
+             transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setShowRepoModal(false);
+                  setTimeout(() => setShowImportRepo(true), 100);
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Add Repository from GitHub
+              </button>
             </div>
           )}
         </div>
-
         {/* NAV (Intact) */}
         <nav className="flex-1 pt-8">
           <ul className="list-none p-0 m-0">
@@ -214,7 +212,6 @@ const Sidebar = ({
             </li>
           </ul>
         </nav>
-
         {/* PROFILE SECTION - MODIFIED FOR NAME AND CHEVRON */}
         <div className="p-3 border-t border-[#222] relative" ref={profileRef}>
           <div

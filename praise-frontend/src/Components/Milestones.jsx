@@ -63,12 +63,14 @@ const Milestones = () => {
 
   // Logic to determine the next pending milestone and progress
   const nextMilestone = milestones.find((m) => !m.active);
-  const nextTarget = nextMilestone ? nextMilestone.criteriaValue : userStats?.totalPRs || 0;
+  const nextTarget = nextMilestone
+    ? nextMilestone.criteriaValue
+    : userStats?.totalPRs || 0;
   const currentPRs = userStats?.totalPRs || 0;
-  const progressPercent = nextMilestone 
-    ? Math.min(100, (currentPRs / nextTarget) * 100) 
+  const progressPercent = nextMilestone
+    ? Math.min(100, (currentPRs / nextTarget) * 100)
     : 100;
-  
+
   // PR chart data (last 50 PRs)
   const prChartData = prActivity.map((item) => ({
     date: new Date(item._id).getDate().toString().padStart(2, "0"),
@@ -118,11 +120,16 @@ const Milestones = () => {
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex flex-col items-center overflow-x-hidden px-6 sm:px-10 py-12">
       {/* Header */}
       <div className="w-full max-w-6xl flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-center sm:text-left">
-            Milestones
-          </h1>
-          <p className="text-gray-400 mt-1">{selectedRepository.name}</p>
+        {/* Left: Page Title */}
+        <div className="text-center sm:text-left flex-1">
+          <h1 className="text-3xl font-bold">Milestones</h1>
+        </div>
+
+        {/* Right: Repository Name */}
+        <div className="text-center sm:text-right flex-1">
+          <p className="text-gray-400 text-lg font-medium">
+            {selectedRepository?.name || "No Repository Selected"}
+          </p>
         </div>
       </div>
 
@@ -159,29 +166,33 @@ const Milestones = () => {
           </h2>
           <div>
             <p className="text-lg font-medium text-gray-300">
-              Target: <span className="text-white font-bold">{nextMilestone ? nextMilestone.title : "All Unlocked!"}</span>
+              Target:{" "}
+              <span className="text-white font-bold">
+                {nextMilestone ? nextMilestone.title : "All Unlocked!"}
+              </span>
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              {nextMilestone ? `Reach ${nextTarget} PRs to unlock the next badge.` : "You've earned every badge available!"}
+              {nextMilestone
+                ? `Reach ${nextTarget} PRs to unlock the next badge.`
+                : "You've earned every badge available!"}
             </p>
           </div>
-          
+
           <div className="w-full bg-gray-700 rounded-full h-3">
-            <div 
+            <div
               className="bg-gradient-to-r from-[#00ffe7] to-[#00bfa5] h-3 rounded-full transition-all duration-700 shadow-[0_0_6px_#00ffe7]"
               style={{ width: `${progressPercent}%` }}
             ></div>
           </div>
           <div className="flex justify-between mt-2 text-sm">
-            <span className="text-gray-400">
-              {currentPRs} PRs
-            </span>
-            <span className="font-semibold" style={{ color: progressPercent >= 100 ? '#4ADE80' : '#00ffe7' }}>
+            <span className="text-gray-400">{currentPRs} PRs</span>
+            <span
+              className="font-semibold"
+              style={{ color: progressPercent >= 100 ? "#4ADE80" : "#00ffe7" }}
+            >
               {progressPercent.toFixed(1)}% Complete
             </span>
-            <span className="text-gray-400">
-              {nextTarget} PRs
-            </span>
+            <span className="text-gray-400">{nextTarget} PRs</span>
           </div>
         </div>
       </div>
@@ -300,11 +311,15 @@ const Milestones = () => {
             <div className="inline-flex gap-4 text-sm text-gray-400">
               <span>
                 Total PRs:{" "}
-                <span className="text-[#00ffe7]">{userStats?.totalPRs || 0}</span>
+                <span className="text-[#00ffe7]">
+                  {userStats?.totalPRs || 0}
+                </span>
               </span>
               <span>
                 Merged:{" "}
-                <span className="text-green-400">{userStats?.mergedPRs || 0}</span>
+                <span className="text-green-400">
+                  {userStats?.mergedPRs || 0}
+                </span>
               </span>
             </div>
           </div>
@@ -347,7 +362,9 @@ const Milestones = () => {
       {/* No Data Message */}
       {prChartData.length === 0 && !chartData && (
         <div className="w-full max-w-6xl mt-16 bg-gray-900 p-8 rounded-2xl shadow-lg text-center">
-          <p className="text-gray-400 text-lg">No activity data available yet</p>
+          <p className="text-gray-400 text-lg">
+            No activity data available yet
+          </p>
           <p className="text-gray-500 text-sm mt-2">
             Start contributing to see your progress!
           </p>
